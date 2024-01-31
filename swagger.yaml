@@ -1,0 +1,2548 @@
+openapi: 3.0.0
+info:
+  title: chiri freelancer management system
+  version: 1.0.0
+  description: The purpose of the Chiri Freelancer Management System is to empower freelancers with efficient tools and resources, streamline freelance operations, foster collaboration, and provide personalized financial insights. This project aims to simplify freelancers' lives and enhance their success in the freelance economy.
+  contact:
+    name: Muhammad Sujon
+    url: https://devsujon.com
+    email: devoloper.sujon@gmail.com
+servers:
+  - description: Development server
+    url: http://localhost:4000/api/v1
+tags:
+  - name: Health
+    description: Api Health Endpoints (public)
+  - name: Auth
+    description: Authentication Endpoints (public)
+  - name: Users
+    description: User Endpoints (admin only)
+  - name: Categories
+    description: Category Endpoints (admin only)
+  - name: Invoices
+    description: Invoice Endpoints (admin only)
+  - name: Bids
+    description: Bid Endpoints (admin only)
+  - name: Tickets
+    description: Ticket Endpoints (admin only)
+  - name: Reports
+    description: Report Endpoints (admin only)
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      description: check API is live on Server.
+      responses:
+        "200":
+          description: Successful Request
+          content:
+            "application/json":
+              schema:
+                type: object
+                required:
+                  - health
+                properties:
+                  health:
+                    type: string
+        "400":
+          $ref: "#components/responses/400"
+        "401":
+          $ref: "#components/responses/401"
+        "403":
+          $ref: "#components/responses/403"
+        "404":
+          $ref: "#components/responses/404"
+        "500":
+          $ref: "#components/responses/500"
+  /auth/signup:
+    post:
+      tags:
+        - "Auth"
+      description: create a new account
+      summary: create a new account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+              properties:
+                name:
+                  type: string
+                  example: Mohamamd Sujon
+                email:
+                  type: string
+                  format: email
+                  example: admin@devsuon.com
+                password:
+                  type: string
+                  format: password
+                  example: pass1234@
+                # $ref: "#components/schemas/SignupDto"
+      responses:
+        "201":
+          description: Signup Successful
+          content:
+            "application/json":
+              schema:
+                type: object
+                required:
+                  - statusCode
+                  - message
+                  - data
+                  - links
+                properties:
+                  statusCode:
+                    type: integer
+                    format: int32
+                    example: 201
+                  message:
+                    type: string
+                    example: Signup Successful
+                  data:
+                    type: object
+                    required:
+                      - access_token
+                    properties:
+                      access_token:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        example: "/auth/signup"
+                      signin:
+                        type: string
+                        example: "/auth/signin"
+        "400":
+          $ref: "#components/responses/400"
+        "401":
+          $ref: "#components/responses/401"
+        "403":
+          $ref: "#components/responses/403"
+        "404":
+          $ref: "#components/responses/404"
+        "500":
+          $ref: "#components/responses/500"
+  /auth/signin:
+    post:
+      tags:
+        - "Auth"
+      description: Login to your account
+      summary: Login to your account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: admin@devsuon.com
+                password:
+                  type: string
+                  format: password
+                  example: pass1234@
+              required: [email, password]
+      responses:
+        "201":
+          description: Signin Successful
+          content:
+            "application/json":
+              schema:
+                type: object
+                required:
+                  - statusCode
+                  - message
+                  - data
+                  - links
+                properties:
+                  statusCode:
+                    type: integer
+                    format: int32
+                    example: 201
+                  message:
+                    type: string
+                    example: Signin Successful
+                  data:
+                    type: object
+                    required:
+                      - access_token
+                    properties:
+                      access_token:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        example: "/auth/signin"
+
+        "400":
+          $ref: "#components/responses/400"
+        "401":
+          $ref: "#components/responses/401"
+        "403":
+          $ref: "#components/responses/403"
+        "404":
+          $ref: "#components/responses/404"
+        "500":
+          $ref: "#components/responses/500"
+  /users:
+    get:
+      summary: Get all users
+      description: Retrieve a list of users.
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/pageParam"
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/sortTypeParam"
+        - $ref: "#/components/parameters/sortByParam"
+        - $ref: "#/components/parameters/searchParam"
+        - in: query
+          name: expand
+          description: expand user
+          schema:
+            type: string
+            example: "user"
+      responses:
+        "200":
+          description: List of users.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        format: url
+                        example: "/users?page=2&limit=10"
+                      next:
+                        type: string
+                        format: url
+                        example: "/users?page=3&limit=10"
+                      prev:
+                        type: string
+                        format: url
+                        example: "/users?page=1&limit=10"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+    post:
+      summary: Create a user
+      description: Create a new user.
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  description: The name of the user.
+                email:
+                  type: string
+                  format: email
+                  description: The email address of the user (should be unique).
+                password:
+                  type: string
+                  minLength: 8
+                  description: The user's password.
+                dateOfBirth:
+                  type: string
+                  format: date
+                  description: The date of birth of the user.
+                gender:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  description: The gender of the user.
+                brief:
+                  type: string
+                  minLength: 3
+                  maxLength: 100
+                  description: A brief description of the user.
+                profileImage:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  description: The user's profile image URL.
+                phone:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  description: The user's phone number.
+                fax:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  description: The user's fax number.
+                address:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  description: The user's address.
+                city:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  description: The city where the user resides.
+                state:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  description: The state where the user resides.
+                zip:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  description: The postal code of the user's location.
+                socialMedia:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      label:
+                        type: string
+                        minLength: 3
+                        maxLength: 30
+                        description: The label for the social media link.
+                      icon:
+                        type: string
+                        minLength: 3
+                        maxLength: 30
+                        description: The icon associated with the social media link.
+                      link:
+                        type: string
+                        minLength: 3
+                        maxLength: 30
+                        description: The URL of the social media link.
+                  description: An array of social media links.
+                role:
+                  type: string
+                  enum: [FREELANCER, OTHER_ROLE] # Define the available roles here
+                  default: FREELANCER
+                  description: The role of the user.
+                status:
+                  type: string
+                  enum: [PENDING, ACTIVE, INACTIVE] # Define the available statuses here
+                  default: PENDING
+                  description: The status of the user.
+              required:
+                - name
+                - email
+                - password
+                - role
+                - status
+      responses:
+        "201":
+          description: User created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/User"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        format: url
+                        example: "/users?page=2&limit=10"
+                      edit:
+                        type: string
+                        format: url
+                        example: "/users/1/edit"
+                      delete:
+                        type: string
+                        format: url
+                        example: "/users/1/delete"
+                      view:
+                        type: string
+                        format: url
+                        example: "/users/1"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+  /users/{id}:
+    get:
+      summary: Get a single user
+      description: Retrieve a user by ID.
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+        - in: query
+          name: expand
+          description: expand user
+          schema:
+            type: string
+            example: "user"
+      responses:
+        "200":
+          description: User retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 200
+                  data:
+                    $ref: "#/components/schemas/User"
+        "404":
+          $ref: "#/components/responses/404"
+    patch:
+      summary: Update a user
+      description: Update a user by ID.
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  description: The name of the user.
+                email:
+                  type: string
+                  format: email
+                  description: The email address of the user (should be unique).
+                password:
+                  type: string
+                  minLength: 8
+                  description: The user's password.
+                dateOfBirth:
+                  type: string
+                  format: date
+                  description: The date of birth of the user.
+                gender:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  description: The gender of the user.
+                brief:
+                  type: string
+                  minLength: 3
+                  maxLength: 100
+                  description: A brief description of the user.
+                profileImage:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  description: The user's profile image URL.
+                phone:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  description: The user's phone number.
+                fax:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  description: The user's fax number.
+                address:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  description: The user's address.
+                city:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  description: The city where the user resides.
+                state:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  description: The state where the user resides.
+                zip:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  description: The postal code of the user's location.
+                socialMedia:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      label:
+                        type: string
+                        minLength: 3
+                        maxLength: 30
+                        description: The label for the social media link.
+                      icon:
+                        type: string
+                        minLength: 3
+                        maxLength: 30
+                        description: The icon associated with the social media link.
+                      link:
+                        type: string
+                        minLength: 3
+                        maxLength: 30
+                        description: The URL of the social media link.
+                  description: An array of social media links.
+                role:
+                  type: string
+                  enum: [FREELANCER, OTHER_ROLE] # Define the available roles here
+                  default: FREELANCER
+                  description: The role of the user.
+                status:
+                  type: string
+                  enum: [PENDING, ACTIVE, INACTIVE] # Define the available statuses here
+                  default: PENDING
+                  description: The status of the user.
+      responses:
+        "200":
+          description: User updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      email:
+                        type: string
+                      role:
+                        type: string
+                      status:
+                        type: string
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+        "404":
+          $ref: "#/components/responses/404"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+    delete:
+      summary: Delete a user
+      description: Delete a user by ID.
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+      responses:
+        "204":
+          description: User deleted successfully.
+        "404":
+          $ref: "#/components/responses/404"
+        "401":
+          $ref: "#/components/responses/400"
+  /users/{id}/password:
+    patch:
+      summary: Change password
+      description: Change the password for a user by ID.
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+              required:
+                - password
+      responses:
+        "200":
+          description: Password changed successfully.
+        "404":
+          $ref: "#/components/responses/404"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+  /categories:
+    get:
+      summary: Get all Categories
+      description: Retrieve a list of categories.
+      security:
+        - bearerAuth: []
+      tags:
+        - Categories
+      parameters:
+        - $ref: "#/components/parameters/pageParam"
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/sortTypeParam"
+        - in: query
+          name: category_type
+          schema:
+            type: string
+            enum: [TICKET, BID, INVOICE]
+            example: BID
+        - in: query
+          name: expand
+          description: expand user object
+          schema:
+            type: string
+            example: "user"
+        - $ref: "#/components/parameters/sortByParam"
+        - $ref: "#/components/parameters/searchParam"
+      responses:
+        "200":
+          description: List of categories.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Category"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        format: url
+                        example: "/articles?page=2&limit=10"
+                      next:
+                        type: string
+                        format: url
+                        example: "/articles?page=3&limit=10"
+                      prev:
+                        type: string
+                        format: url
+                        example: "/articles?page=1&limit=10"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+    post:
+      summary: Create a Category
+      description: Create a new category.
+      security:
+        - bearerAuth: []
+      tags:
+        - Categories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                active:
+                  type: boolean
+                  default: true
+                type:
+                  type: string
+                  enum: [TICKET, BID, INVOICE]
+                  default: "BID"
+      responses:
+        "201":
+          description: Category created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Category"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        format: url
+                        example: "/articles?page=2&limit=10"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+  /categories/{id}:
+    get:
+      summary: Get a single Category
+      description: Retrieve a category by ID.
+      security:
+        - bearerAuth: []
+      tags:
+        - Categories
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the category to retrieve.
+          schema:
+            type: string
+        - in: query
+          name: expand
+          description: expand user object
+          schema:
+            type: string
+            example: "user"
+      responses:
+        "200":
+          description: Category retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 200
+                  data:
+                    $ref: "#/components/schemas/Category"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+    patch:
+      summary: Update a Category
+      description: Update a category by ID.
+      security:
+        - bearerAuth: []
+      tags:
+        - Categories
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the category to update.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                name:
+                  type: string
+                active:
+                  type: boolean
+                  default: true
+                type:
+                  type: string
+                  enum: [TICKET, BID, INVOICE]
+                  default: "BID"
+      responses:
+        "200":
+          description: Category updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Category"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+    delete:
+      summary: Delete a Category
+      description: Delete a category by ID.
+      security:
+        - bearerAuth: []
+      tags:
+        - Categories
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the category to delete.
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Category deleted successfully.
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+  /invoices:
+    get:
+      summary: Get all Invoices
+      description: Retrieve a list of invoices.
+      tags:
+        - Invoices
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/pageParam"
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/sortTypeParam"
+        - $ref: "#/components/parameters/sortByParam"
+        - $ref: "#/components/parameters/searchParam"
+        - in: query
+          name: expand
+          description: expand user object
+          schema:
+            type: string
+            example: "user"
+      responses:
+        "200":
+          description: List of invoices.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Invoice"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        format: url
+                        example: "/invoices?page=2&limit=10"
+                      next:
+                        type: string
+                        format: url
+                        example: "/invoices?page=3&limit=10"
+                      prev:
+                        type: string
+                        format: url
+                        example: "/invoices?page=1&limit=10"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+    post:
+      summary: Create an Invoice
+      description: Create a new invoice.
+      security:
+        - bearerAuth: []
+      tags:
+        - Invoices
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - "categoryId"
+                - "invoiceNumber"
+                - "amountDue"
+                - "price"
+                - "grandTotal"
+              properties:
+                categoryId:
+                  type: string
+                  example: 64febc56e095fa78c7fb69ec
+                invoiceNumber:
+                  type: string
+                  description: Invoice number.
+                  example: "INV-2023-001"
+                dateOfCreation:
+                  type: string
+                  format: date-time
+                  description: Date of invoice creation.
+                  example: "2023-09-15T10:30:00Z"
+                dateSent:
+                  type: string
+                  format: date-time
+                  description: Date when the invoice was sent.
+                  example: "2023-09-20T12:45:00Z"
+                dateDue:
+                  type: string
+                  format: date-time
+                  description: Due date for the invoice.
+                  example: "2023-10-05T23:59:59Z"
+                tax:
+                  type: number
+                  description: Tax amount for the invoice.
+                  example: 100
+                discount:
+                  type: number
+                  description: Discount amount applied to the invoice.
+                  example: 20
+                price:
+                  type: number
+                  description: Price applied to the invoice.
+                  example: 20
+                grandTotal:
+                  type: number
+                  description: Grand Total applied to the invoice.
+                  example: 20
+                amountDue:
+                  type: number
+                  description: Total amount due on the invoice.
+                  example: 800
+                brief:
+                  type: string
+                  description: Brief description or notes related to the invoice.
+                  example: "Payment due upon receipt."
+                status:
+                  type: string
+                  enum:
+                    - NEW
+                    - COMPLETE
+                  description: Status of the invoice (new or complete).
+                  example: "NEW"
+      responses:
+        "201":
+          description: Invoice created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Invoice"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        format: url
+                        example: "/invoices?page=2&limit=10"
+                      next:
+                        type: string
+                        format: url
+                        example: "/invoices?page=3&limit=10"
+                      prev:
+                        type: string
+                        format: url
+                        example: "/invoices?page=1&limit=10"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+  /invoices/{id}:
+    get:
+      summary: Get a single Invoice
+      description: Retrieve an invoice by ID.
+      tags:
+        - Invoices
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+        - in: query
+          name: expand
+          description: expand user object
+          schema:
+            type: string
+            example: "user"
+      responses:
+        "200":
+          description: Invoice retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 200
+                  data:
+                    $ref: "#/components/schemas/Invoice"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+    patch:
+      summary: Update an Invoice
+      description: Update an invoice by ID.
+      tags:
+        - Invoices
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoryId:
+                  type: string
+                  example: 64febc56e095fa78c7fb69ec
+                invoiceNumber:
+                  type: string
+                  description: Invoice number.
+                  example: "INV-2023-001"
+                dateOfCreation:
+                  type: string
+                  format: date-time
+                  description: Date of invoice creation.
+                  example: "2023-09-15T10:30:00Z"
+                dateSent:
+                  type: string
+                  format: date-time
+                  description: Date when the invoice was sent.
+                  example: "2023-09-20T12:45:00Z"
+                dateDue:
+                  type: string
+                  format: date-time
+                  description: Due date for the invoice.
+                  example: "2023-10-05T23:59:59Z"
+                tax:
+                  type: number
+                  description: Tax amount for the invoice.
+                  example: 100
+                discount:
+                  type: number
+                  description: Discount amount applied to the invoice.
+                  example: 20
+                amountDue:
+                  type: number
+                  description: Total amount due on the invoice.
+                  example: 800
+                brief:
+                  type: string
+                  description: Brief description or notes related to the invoice.
+                  example: "Payment due upon receipt."
+                status:
+                  type: string
+                  enum:
+                    - NEW
+                    - COMPLETE
+                  description: Status of the invoice (new or complete).
+                  example: "NEW"
+      responses:
+        "200":
+          description: Invoice updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Invoice"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+    delete:
+      summary: Delete an Invoice
+      description: Delete an invoice by ID.
+      tags:
+        - Invoices
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+      responses:
+        "204":
+          description: Invoice deleted successfully.
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+  /bids:
+    get:
+      summary: Get all Bids
+      description: Retrieve a list of bids.
+      tags:
+        - Bids
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/pageParam"
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/sortTypeParam"
+        - $ref: "#/components/parameters/sortByParam"
+        - $ref: "#/components/parameters/searchParam"
+      responses:
+        "200":
+          description: List of bids.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Bid"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        format: url
+                        example: "/bids?page=2&limit=10"
+                      next:
+                        type: string
+                        format: url
+                        example: "/bids?page=3&limit=10"
+                      prev:
+                        type: string
+                        format: url
+                        example: "/bids?page=1&limit=10"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+    post:
+      summary: Create a Bid
+      description: Create a new bid.
+      tags:
+        - Bids
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                buyerId:
+                  type: string
+                  description: The ID of the buyer.
+                  example: 64fcfd337535c17025069ae3
+                sellerId:
+                  type: string
+                  description: The ID of the seller.
+                  example: 64fcfd337535c17025069ae3
+                categoryId:
+                  type: string
+                  description: The ID of the category.
+                  example: 64fcfd337535c17025069ae3
+                bidNumber:
+                  type: integer
+                  description: The bid number.
+                dateOfBid:
+                  type: string
+                  format: date-time
+                  description: The date and time when the bid was placed.
+                bidStatus:
+                  type: string
+                  enum: [ACCEPTED, REJECTED, SELECTED, WAITING]
+                  default: WAITING
+                  description: The status of the bid.
+                paymentType:
+                  type: string
+                  enum: [CARD, CASH, CHEQUE, ESCROW]
+                  default: CARD
+                  description: The payment type.
+                price:
+                  type: integer
+                  description: The price of the bid.
+                tax:
+                  type: integer
+                  description: The tax amount.
+                discount:
+                  type: integer
+                  description: The discount amount.
+                amountDue:
+                  type: integer
+                  description: The amount due.
+                brief:
+                  type: string
+                  description: A brief description of the bid.
+              required:
+                - categoryId
+                - bidNumber
+                - dateOfBid
+                - price
+                - bidStatus
+                - paymentType
+                - tax
+                - amountDue
+      responses:
+        "201":
+          description: Bid created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Bid"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        format: url
+                        example: "/bids/123"
+                      edit:
+                        type: string
+                        format: url
+                        example: "/bids/123/edit"
+                      delete:
+                        type: string
+                        format: url
+                        example: "/bids/123/delete"
+                      view:
+                        type: string
+                        format: url
+                        example: "/bids/123/view"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+  /bids/{id}:
+    get:
+      summary: Get a single Bid
+      description: Retrieve a bid by ID.
+      tags:
+        - Bids
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+        - in: query
+          name: expand
+          description: expand user object
+          schema:
+            type: string
+            example: "user"
+      responses:
+        "200":
+          description: Bid retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bid"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+    patch:
+      summary: Update a Bid
+      description: Update a bid by ID.
+      tags:
+        - Bids
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                buyerId:
+                  type: string
+                  description: The ID of the buyer.
+                  example: 64fcfd337535c17025069ae3
+                sellerId:
+                  type: string
+                  description: The ID of the seller.
+                  example: 64fcfd337535c17025069ae3
+                categoryId:
+                  type: string
+                  description: The ID of the category.
+                  example: 64fcfd337535c17025069ae3
+                bidNumber:
+                  type: integer
+                  description: The bid number.
+                dateOfBid:
+                  type: string
+                  format: date-time
+                  description: The date and time when the bid was placed.
+                bidStatus:
+                  type: string
+                  enum: [ACCEPTED, REJECTED, SELECTED, WAITING]
+                  default: WAITING
+                  description: The status of the bid.
+                paymentType:
+                  type: string
+                  enum: [CARD, CASH, CHEQUE, ESCROW]
+                  default: CARD
+                  description: The payment type.
+                price:
+                  type: integer
+                  description: The price of the bid.
+                tax:
+                  type: integer
+                  description: The tax amount.
+                discount:
+                  type: integer
+                  description: The discount amount.
+                amountDue:
+                  type: integer
+                  description: The amount due.
+                brief:
+                  type: string
+                  description: A brief description of the bid.
+      responses:
+        "200":
+          description: Bid updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bid"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+    delete:
+      summary: Delete a Bid
+      description: Delete a bid by ID.
+      tags:
+        - Bids
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+      responses:
+        "204":
+          description: Bid deleted successfully.
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+  /tickets:
+    get:
+      summary: Get all Tickets
+      description: Retrieve a list of tickets.
+      tags:
+        - Tickets
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/pageParam"
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/sortTypeParam"
+        - $ref: "#/components/parameters/sortByParam"
+        - $ref: "#/components/parameters/searchParam"
+        - in: query
+          name: expand
+          description: expand user object
+          schema:
+            type: string
+            example: "user"
+      responses:
+        "200":
+          description: List of tickets.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Ticket"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        format: url
+                        example: "/tickets?page=2&limit=10"
+                      next:
+                        type: string
+                        format: url
+                        example: "/tickets?page=3&limit=10"
+                      prev:
+                        type: string
+                        format: url
+                        example: "/tickets?page=1&limit=10"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+    post:
+      summary: Create a Ticket
+      description: Create a new ticket.
+      tags:
+        - Tickets
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoryId:
+                  type: string
+                  description: The ID of the category associated with the ticket.
+                  default: 64fcfd337535c17025069ab3
+                ticketNumber:
+                  type: integer
+                  description: The ticket number.
+                name:
+                  type: string
+                  description: The name of the ticket holder.
+                email:
+                  type: string
+                  format: email
+                  description: The email address of the ticket holder.
+                phone:
+                  type: string
+                  description: The phone number of the ticket holder.
+                ticketSubject:
+                  type: string
+                  description: The subject of the ticket.
+                dateOfCreation:
+                  type: string
+                  format: date-time
+                  description: The date and time when the ticket was created.
+                type:
+                  type: string
+                  enum: [WEB_DESIGN, LOGO_DESIGN, BRANDING, SOFTWARE_CONSULTING]
+                  default: WEB_DESIGN
+                  description: The type of the ticket.
+              required:
+                - categoryId
+                - ticketNumber
+                - name
+                - email
+                - phone
+                - ticketSubject
+                - dateOfCreation
+      responses:
+        "201":
+          description: Ticket created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Ticket"
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        format: url
+                        example: "/tickets/123"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+  /tickets/{id}:
+    get:
+      summary: Get a single Ticket
+      description: Retrieve a ticket by ID.
+      tags:
+        - Tickets
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+        - in: query
+          name: expand
+          description: expand user object
+          schema:
+            type: string
+            example: "user"
+      responses:
+        "200":
+          description: Ticket retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ticket"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+    patch:
+      summary: Update a Ticket
+      description: Update a ticket by ID.
+      tags:
+        - Tickets
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoryId:
+                  type: string
+                  description: The ID of the category associated with the ticket.
+                  example: 64fcfd337535c17025069ab3
+                ticketNumber:
+                  type: integer
+                  description: The ticket number.
+                name:
+                  type: string
+                  description: The name of the ticket holder.
+                email:
+                  type: string
+                  format: email
+                  description: The email address of the ticket holder.
+                phone:
+                  type: string
+                  description: The phone number of the ticket holder.
+                ticketSubject:
+                  type: string
+                  description: The subject of the ticket.
+                dateOfCreation:
+                  type: string
+                  format: date-time
+                  description: The date and time when the ticket was created.
+                type:
+                  type: string
+                  enum: [WEB_DESIGN, LOGO_DESIGN, BRANDING, SOFTWARE_CONSULTING]
+                  default: WEB_DESIGN
+                  description: The type of the ticket.
+      responses:
+        "200":
+          description: Ticket updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/Ticket"
+        "404":
+          $ref: "#/components/responses/404"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+    delete:
+      summary: Delete a Ticket
+      description: Delete a ticket by ID.
+      tags:
+        - Tickets
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/idPathParam"
+      responses:
+        "204":
+          description: Ticket deleted successfully.
+        "404":
+          $ref: "#/components/responses/404"
+  /reports/bids:
+    get:
+      summary: Get Bid Reports
+      description: Retrieve a reports of bids.
+      tags:
+        - Reports
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: timeFrame
+          schema:
+            type: string
+            enum: [DAILY, WEEKLY, MONTHLY, YEARLY]
+            example: DAILY
+      responses:
+        "200":
+          description: Retrieve a reports of bids.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        bidStatus:
+                          type: string
+                        date:
+                          type: string
+                          format: date-time
+                        total:
+                          type: integer
+                          format: int32
+
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+  /reports/bids/category:
+    get:
+      summary: Get Bid category Reports
+      description: Retrieve a reports of bids category.
+      tags:
+        - Reports
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Retrieve a reports of bids category.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        category:
+                          type: string
+                        total:
+                          type: integer
+                          format: int32
+
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+  /reports/buyer-seller:
+    get:
+      summary: Get buyers & sellers Reports
+      description: Retrieve a reports of buyers & sellers.
+      tags:
+        - Reports
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: role
+          schema:
+            type: string
+            enum: [BUYER, SELLER]
+            example: BUYER
+      responses:
+        "200":
+          description: Retrieve a reports of buyers & sellers.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        stats:
+                          type: string
+                        total:
+                          type: integer
+                          format: int32
+
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+  /reports/buyer-seller-summary:
+    get:
+      summary: Get Buyer Seller Summary Reports
+      description: Retrieve a reports of Buyer Seller Summary.
+      tags:
+        - Reports
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: timeFrame
+          schema:
+            type: string
+            enum: [DAILY, WEEKLY, MONTHLY, YEARLY]
+            example: DAILY
+        - in: query
+          name: role
+          schema:
+            type: string
+            enum: [BUYER, SELLER]
+            example: BUYER
+      responses:
+        "200":
+          description: Retrieve reports of Buyer Seller Summary.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        stats:
+                          type: string
+                        date:
+                          type: string
+                          format: date-time
+                        total:
+                          type: integer
+                          format: int32
+
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+  /reports/earnings:
+    get:
+      summary: Get Earnings Reports
+      description: Retrieve a reports of Earnings.
+      tags:
+        - Reports
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: timeFrame
+          schema:
+            type: string
+            enum: [DAILY, WEEKLY, MONTHLY, YEARLY]
+            example: DAILY
+      responses:
+        "200":
+          description: Retrieve reports of Earnings.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        total:
+                          type: integer
+                          format: int32
+
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+  /reports/earnings/category:
+    get:
+      summary: Get Invoice category Reports
+      description: Retrieve a reports of Invoices category.
+      tags:
+        - Reports
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: timeFrame
+          schema:
+            type: string
+            enum: [DAILY, WEEKLY, MONTHLY, YEARLY]
+            example: DAILY
+      responses:
+        "200":
+          description: Retrieve a reports of Invoices category.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        category:
+                          type: string
+                        total:
+                          type: integer
+                          format: int32
+
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/400"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    pageParam:
+      in: query
+      name: page
+      description: Current page number (default 1).
+      schema:
+        type: integer
+        format: int32
+        example: 2
+    limitParam:
+      in: query
+      name: limit
+      description: Number of items per page (default 10).
+      schema:
+        type: integer
+        format: int32
+        example: 10
+    sortTypeParam:
+      in: query
+      name: sort_type
+      description: Type of sort, either asc or desc (default desc).
+      schema:
+        type: string
+        enum: [asc, dsc]
+        example: dsc
+    sortByParam:
+      in: query
+      name: sort_by
+      description: Property used for sorting, either updatedAt or title (default updatedAt).
+      schema:
+        type: string
+        example: updatedAt
+    searchParam:
+      in: query
+      name: search
+      description: Search keyword for filtering items by name.
+      schema:
+        type: string
+        example: title
+    idPathParam:
+      in: path
+      name: id
+      required: true
+      description: The unique identifier of the item.
+      schema:
+        type: string
+        example: 64fcfd337535c17025069ab3
+  responses:
+    "500":
+      description: "Internal Server Error"
+      content:
+        "application/json":
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                format: int32
+                example: 500
+              error:
+                type: string
+                example: Internal Server Error
+              message:
+                type: string
+                example: We are sorry for the inconvenience. Please try again later
+    "400":
+      description: "Bad Request"
+      content:
+        "application/json":
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                format: int32
+                example: 400
+              error:
+                type: string
+                example: Bad Request
+              message:
+                type: string
+                example: Invalid Parameters
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                      example: email
+                    message:
+                      type: string
+                      example: Invalid email
+                    in:
+                      type: string
+                      enum: [query, body]
+                      example: body
+    "401":
+      description: Unauthorized
+      content:
+        "application/json":
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                format: int32
+                example: 401
+              error:
+                type: string
+                example: Unauthorized
+              message:
+                type: string
+                example: "Sorry, you are not authorized to access this resource."
+    "403":
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - statusCode
+              - error
+              - message
+            properties:
+              statusCode:
+                type: integer
+                format: int32
+                example: 403
+              error:
+                type: string
+                example: Forbidden
+              message:
+                type: string
+                example: You don't have the right permissions
+    "404":
+      description: Resource Not Found
+      content:
+        "application/json":
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: integer
+                format: int32
+                example: 404
+              error:
+                type: string
+                example: Not Found
+              message:
+                type: string
+                example: Requested resource not found
+  schemas:
+    Timestamp:
+      type: object
+      properties:
+        createdAt:
+          description: Timestamp indicating when the bid was created.
+          type: string
+          format: date-time
+        updatedAt:
+          description: Timestamp indicating when the bid was last updated.
+          type: string
+          format: date-time
+      required:
+        - createdAt
+        - updatedAt
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          example: 2
+        limit:
+          type: integer
+          format: int32
+          example: 10
+        next:
+          type: integer
+          format: int32
+          example: 3
+        prev:
+          type: integer
+          format: int32
+          example: 1
+        totalPage:
+          type: integer
+          format: int32
+          example: 5
+        totalItems:
+          type: integer
+          format: int32
+          example: 50
+      required:
+        - page
+        - limit
+        - totalPage
+        - totalItems
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+          enum:
+            - freelancer
+            - buyer
+            - seller
+            - admin
+          default: freelancer
+        status:
+          type: string
+          enum:
+            - pending
+            - approved
+            - block
+            - decline
+          default: pending
+        timestamp:
+          type: string
+          format: date-time
+    Profile:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date-time
+        gender:
+          type: string
+        brief:
+          type: string
+        profileImage:
+          type: string
+        phone:
+          type: string
+        fax:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zip:
+          type: string
+        socialMedia:
+          type: string
+        timestamp:
+          $ref: "#/components/schemas/Timestamp"
+    SignupDto:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+          example: Mohamamd Sujon
+        email:
+          type: string
+          format: email
+          example: admin@devsuon.com
+        password:
+          type: string
+          format: password
+          example: pass1234@
+    SigninDto:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: admin@devsuon.com
+        password:
+          type: string
+          format: password
+          example: pass1234@
+    AuthorDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 1
+        name:
+          type: string
+          example: "Muhammad Sujon"
+    Category:
+      type: object
+      required:
+        - id
+        - userId
+        - adminId
+        - name
+      properties:
+        id:
+          type: string
+          example: 64fcfd337535c17025069ab3
+        adminId:
+          type: string
+          example: 64fcfd337535c17025069ab3
+        userId:
+          type: string
+          example: 64fcfd337535c17025069ab3
+        name:
+          type: string
+        active:
+          type: boolean
+          default: true
+        type:
+          type: string
+          enum: [TICKET, BID, INVOICE]
+          default: "BID"
+        timestamp:
+          $ref: "#/components/schemas/Timestamp"
+    Invoice:
+      type: object
+      required:
+        - id
+        - adminId
+        - userId
+        - invoiceNumber
+      properties:
+        id:
+          type: string
+          example: 64fcfd337535c17025069ab3
+        adminId:
+          type: string
+          example: 64fcfd337535c17025069ab3
+        userId:
+          type: string
+          example: 64fcfd337535c17025069ab3
+        categoryId:
+          type: string
+          example: "64fcfd337535c17025069ab3"
+        invoiceNumber:
+          type: string
+          description: Invoice number.
+          example: "INV-2023-001"
+        dateOfCreation:
+          type: string
+          format: date-time
+          description: Date of invoice creation.
+          example: "2023-09-15T10:30:00Z"
+        dateSent:
+          type: string
+          format: date-time
+          description: Date when the invoice was sent.
+          example: "2023-09-20T12:45:00Z"
+        dateDue:
+          type: string
+          format: date-time
+          description: Due date for the invoice.
+          example: "2023-10-05T23:59:59Z"
+        tax:
+          type: number
+          description: Tax amount for the invoice.
+          example: 100
+        discount:
+          type: number
+          description: Discount amount applied to the invoice.
+          example: 20
+        amountDue:
+          type: number
+          description: Total amount due on the invoice.
+          example: 800.0
+        brief:
+          type: string
+          description: Brief description or notes related to the invoice.
+          example: "Payment due upon receipt."
+        status:
+          type: string
+          enum:
+            - NEW
+            - COMPLETE
+          description: Status of the invoice (new or complete).
+          default: "NEW"
+        timestamp:
+          $ref: "#/components/schemas/Timestamp"
+      xml:
+        name: Invoice
+    Bid:
+      type: object
+      required:
+        - id
+        - adminId
+        - userId
+        - categoryId
+        - bidNumber
+        - price
+        - timestamp
+      properties:
+        id:
+          type: string
+          example: 64fcfd337535c17025069ab3
+        adminId:
+          type: string
+          example: 64fcfd337535c17025069ab3
+        userId:
+          type: string
+          example: 64fcfd337535c17025069ab3
+        buyerId:
+          type: string
+          example: 64fcfd337535c17025069ab3
+        sellerId:
+          type: string
+          example: 64fcfd337535c17025069ab3
+        categoryId:
+          type: string
+          example: 64fcfd337535c17025069ab3
+        bidNumber:
+          type: integer
+          format: int32
+          description: Bid number.
+          example: 42
+        dateOfBid:
+          type: string
+          format: date-time
+          description: Date and time when the bid was placed.
+          example: "2023-09-15T14:30:00Z"
+        bidStatus:
+          type: string
+          description: Status of the bid.
+          enum: [ACCEPTED, REJECTED, SELECTED, WAITING]
+          default: "WAITING"
+        paymentType:
+          type: string
+          enum: [CARD, CASH, CHEQUE, ESCROW]
+          description: Payment type for the bid.
+          default: "CARD"
+        price:
+          type: integer
+          format: int32
+          description: Bid price.
+          example: 500
+        tax:
+          type: integer
+          format: int32
+          description: Tax amount for the bid.
+          example: 50
+        discount:
+          type: integer
+          format: int32
+          description: Discount amount applied to the bid.
+          example: 10
+        amountDue:
+          type: integer
+          format: int32
+          description: Total amount due for the bid.
+          example: 540
+        brief:
+          type: string
+          description: Brief description or notes related to the bid.
+          example: "Payment due upon completion."
+        timestamp:
+          $ref: "#/components/schemas/Timestamp"
+      xml:
+        name: Bid
+    Ticket:
+      type: object
+      required:
+        - "id"
+        - "adminId"
+        - "userId"
+        - "categoryId"
+        - "ticketNumber"
+        - "name"
+        - "email"
+        - "phone"
+        - "ticketSubject"
+        - "dateOfCreation"
+        - "type"
+        - "timestamp"
+      properties:
+        id:
+          type: string
+          example: 64fcfd337535c17025069ab3
+        adminId:
+          type: string
+          example: 64fcfd337535c17025069ab3
+        userId:
+          type: string
+          example: 64fcfd337535c17025069ab3
+        categoryId:
+          type: string
+          example: 64fcfd337535c17025069ab3
+        ticketNumber:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        ticketSubject:
+          type: string
+        dateOfCreation:
+          type: string
+          format: date-time
+        type:
+          type: string
+          enum: [WEB_DESIGN, LOGO_DESIGN, BRANDING, SOFTWARE_CONSULTING]
+          default: WEB_DESIGN
+        timestamp:
+          $ref: "#/components/schemas/Timestamp"
