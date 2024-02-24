@@ -41,7 +41,7 @@ const createItem = async (req, res, next) => {
 
     const profile = await userService.createProfile(session, {
       userId: user.id,
-      adminId: user.id,
+      adminId: req.user.adminId,
       name,
       email,
       password,

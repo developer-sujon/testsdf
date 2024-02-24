@@ -16,10 +16,11 @@ const authentication = async (req, res, next) => {
     if (user.status !== "APPROVED") {
       next(unauthorizedException(`Your account is ${user.status}`));
     }
+
     req.user = {
       ...user._doc,
       id: user.id,
-      adminId: "64fcfd337535c17025069ab3",
+      adminId: user.id,
     };
     next();
   } catch (e) {

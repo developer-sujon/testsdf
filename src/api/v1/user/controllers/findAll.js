@@ -35,6 +35,7 @@ const findAll = async (req, res, next) => {
 
     // pagination
     const totalItems = await userService.count({ adminId, search });
+    console.log(totalItems);
     const pagination = paginationGenerator({ totalItems, limit, page });
 
     // HATEOAS Links

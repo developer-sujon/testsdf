@@ -16,7 +16,7 @@ const { generateHash } = require("../../utils/hashing");
  * @param {*} param0
  * @returns
  */
-const count = ({ search = "" }) => {
+const count = ({ search = "", adminId }) => {
   const filter = {
     $and: [
       { adminId },
@@ -32,7 +32,7 @@ const count = ({ search = "" }) => {
       },
     ],
   };
-  return User.count(filter);
+  return Profile.count(filter);
 };
 
 /**

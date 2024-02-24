@@ -8,7 +8,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "node src/index.js",
+    "start": "pm2 start ecosystem.config.json --no-daemon",
     "start:dev": "cross-env NODE_ENV=development nodemon src/index.js",
     "test": "jest --watch-all",
     "seed": "nodemon seed.js"

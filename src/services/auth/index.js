@@ -18,7 +18,6 @@ const register = async (session, { name, email, password }) => {
   if (hasUser) {
     throw badRequestException("User already exist");
   }
-
   password = await generateHash(password);
   const user = await createUser(session, { name, email, password });
   await createProfile(session, {
@@ -33,6 +32,7 @@ const register = async (session, { name, email, password }) => {
 
 const login = async ({ email, password }) => {
   const user = await findUserByEmail(email);
+  console.log(user, email);
   if (!user) {
     throw unauthorizedException("Invalid Credentials");
   }
